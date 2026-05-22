@@ -245,3 +245,16 @@ async def summarise_notification(req: NotificationRequest):
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "3.0"}
+
+@app.on_event("startup")
+async def startup_event():
+    import asyncio
+    async def keep_alive():
+        while True:
+            await asyncio.sleep(600)
+            try:
+                async with httpx.AsyncClient() as client:
+                    await client.get("https://bharo-api.onrender.com/health")
+            except:
+                pass
+    asyncio.create_task(keep_alive())
